@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'RAMPUP_USERS', defaultValue: '1', description: 'Rampup users quantity')
+        string(name: 'RAMPUP_PERIOD', defaultValue: '1', description: 'Rampup period')
+        string(name: 'CONSTANT_USERS', defaultValue: '1', description: 'Constant users')
+        string(name: 'CONSTANT_PERIOD', defaultValue: '1', description: 'Constant load period')
+    }
+
+    tools {
+        gradle 'gradle-8.0'
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', url: 'https://github.com/AnnaKlueva/GatlingExampleWithJava.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
+                {
+                    sh "./gradlew gatlingRun -DrampUpUsers=${params.RAMPUP_USERS} -DconstantUsers=1 -DrampUpTime=${params.RAMPUP_PERIOD} -DconstantTime=1"
+                }
+            }
+        }
+
+        stage('Report'){
+            steps{
+                always {
+                        gatlingArchive()
+                }
+                step([$class: 'GatlingPublisher', enabled: true])
+            }
+        }
+    }
+}
