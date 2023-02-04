@@ -8,7 +8,7 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import static shopizer.BasicScenarios.users;
 
 public class ShopizerSimulation extends Simulation {
-    private static final String BASE_URL = "http://localhost:8080";
+    private static final String BASE_URL = "http://localhost:8081";
     HttpProtocolBuilder httpProtocol = http.baseUrl(BASE_URL).header("Content-Type", "application/json");
 
     //SystemProperties in secs
